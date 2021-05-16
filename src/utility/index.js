@@ -6,7 +6,7 @@ export function GetIconUrl(icon) {
     //return `http://openweathermap.org/img/wn/${icon}@2x.png`;
 }
 
-export function GetHourOnly(time,timeZone){
+export function GetHourOnly(time){
     let hour = new Date(time * 1000).getHours();
     if(hour> 12){
         hour = hour - 12;
@@ -133,10 +133,4 @@ const CreateDataset = (weekly, type) => {
     return dataset;
 }
 
-export const InstallServiceWorker = async () => {
-    const register = await navigator.serviceWorker.register("sw.js", {
-        scope: "/"
-      });
-      return register;
-}
 

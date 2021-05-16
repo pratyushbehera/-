@@ -37,12 +37,8 @@ this.addEventListener("fetch", event => {
 });
 
 this.addEventListener("push", event => {
-  console.log("push received...");
-  // this.clients.matchAll().then(function(c) {
-  //   if (c.length === 0) {
   const data = event.data.json();
   // Show notification
-  console.log("push received...");
   event.waitUntil(
     this.registration.showNotification(data.title, {
       body: "Check out the weather",

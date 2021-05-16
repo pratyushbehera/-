@@ -4,7 +4,7 @@ const SearchBox = (props) => {
     return (
         <div className="row">
             <div className="col s12 m12 l12">
-                <div className="input-field col s10 m10 l10">
+                <div className="input-field col s8 m8 l10">
                     <input id="search" name="place" type="text" placeholder="Search a place..." 
                     onChange={props.onChangeHandler} onKeyPress={props.keyPressHandler}/>
                 </div>

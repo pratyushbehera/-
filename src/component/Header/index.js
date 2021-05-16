@@ -1,7 +1,7 @@
 import React from "react";
 const STYLE = {
-  loadingText: {
-    fontSize: '1rem', color: '#fff'
+  text: {
+    fontSize: '1rem', color: '#fff', marginTop:'10px'
   },
   width100: {
     width: '100%'
@@ -20,13 +20,15 @@ const Header = (props) => {
         </div>
       </div>
       <div className="container center-align">
+        <br/>
         {props.isLoading &&
-          <span className="loading" style={STYLE.loadingText}>...</span>
+          <span className="loading" style={STYLE.text}>...</span>
         }
         {!props.isLoading &&
-          <span style={STYLE.loadingText}>
+          <span style={STYLE.text}>
             {props.currentPlace}
           </span>
+          
         }
 
       </div>

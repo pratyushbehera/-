@@ -5,7 +5,7 @@ import Header from '../Header';
 import Body from '../Body';
 import Footer from '../Footer';
 import Search from '../Search';
-import { GetWeeklyGraph, InstallServiceWorker } from '../../utility';
+import { GetWeeklyGraph } from '../../utility';
 import Notify from '../../utility/notification';
 import DataAccess from '../../data';
 
@@ -32,19 +32,16 @@ export default class App extends React.Component {
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.setCurrentPlace = this.setCurrentPlace.bind(this);
     this.keyPressHandler = this.keyPressHandler.bind(this);
+    this.enableNotification = this.enableNotification.bind(this);
+    this.showNotificationPermission = this.showNotificationPermission.bind(this);
   }
   
-  async componentDidMount() {
+  componentDidMount() {
     this.GetPlaceByIP();
     let instances;
     document.addEventListener('DOMContentLoaded', function () {
       instances = M.Modal.init(document.querySelectorAll('.modal'), {});
     });
-
-    const register = await InstallServiceWorker();
-    console.log(register);
-    let notification = new Notify(register);
-    notification.createNotification();
   }
   
   componentWillUnmount(){
@@ -52,6 +49,7 @@ export default class App extends React.Component {
     document.removeEventListener('DOMContentLoaded', function () {
       instances = M.Modal.init(document.querySelectorAll('.modal'), {});
     });
+    if(instances)
     instances.destroy();
   }
 
@@ -139,6 +137,15 @@ export default class App extends React.Component {
     let instances = M.Modal.init(document.querySelectorAll('.modal'), {});
     instances[0].close();
     document.querySelectorAll('body')[0].attributes[0].nodeValue = "overflow: visible;"
+  }
+
+  enableNotification(){    
+    let notification = new Notify();
+    notification.createNotification();
+  }
+
+  showNotificationPermission(){
+    //To be implemented
   }
 
   render() {

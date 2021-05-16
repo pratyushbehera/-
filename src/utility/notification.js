@@ -1,7 +1,15 @@
 let publicVapidKey =
     "BCUXSY76CeFb0sew7-j4Hb5VJXEafGiFZKbV0oL5Nf_RO9HjiM2ISZ676KcVJLvy2zB88w_XnEkG2kPsU9vqf_U";
 export default class Notify {
-    constructor(register) {
+    constructor() {
+        this.register = {};
+    }
+
+
+    async getRegister() {
+        const register = await navigator.serviceWorker.register("sw.js", {
+            scope: "/"
+        });
         this.register = register;
     }
 
@@ -16,8 +24,9 @@ export default class Notify {
         return outputArray;
     }
 
-    async getSubscription(){
-        const subscription = await this.register.pushManager.subscribe({
+    async getSubscription() {
+        let register = await this.getRegister();
+        const subscription = register.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: this.urlBase64ToUint8Array(publicVapidKey)
         });
@@ -34,10 +43,10 @@ export default class Notify {
         });
     }
 
-    createNotification(){
+    createNotification() {
         if ("serviceWorker" in navigator) {
             this.send().catch(err => console.log("This happened: ", err));
-          }
+        }
     }
 
 }

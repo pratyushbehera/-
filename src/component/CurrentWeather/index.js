@@ -30,7 +30,8 @@ const currentWeather = (props) => {
                                         {props.isLoading && <span className="loading">0</span>}
                                         {!props.isLoading &&
                                             new Date(props.currently.time * 1000).toLocaleString('en-US', { timeZone: props.timeZone })
-                                        }</p>
+                                        }
+                                        </p>
                                 </div>
                                 <div className="col l8 m8 hide-on-small-only">
 

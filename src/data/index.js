@@ -12,7 +12,6 @@ export default class DataAccess {
     }
 
     set weatherUrl(place){
-        // https://api.openweathermap.org/data/2.5/onecall?lat=12.9634&lon=77.5855&exclude={part}&appid=07e3d77bffe31af1a81ef4e1ba869917
         this._weatherUrl =`https://weatherusing-thirdparty.kirankumardash1.repl.co/forecast/city/${place}?units=si`;
     }
 

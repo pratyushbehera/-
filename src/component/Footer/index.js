@@ -8,7 +8,7 @@ const Footer = (props) => {
          <a className="grey-text text-lighten-4" href="https://reactjs.org/">ReactJS</a> &nbsp;
          and &nbsp;
           <a className="grey-text text-lighten-4" href="https://materializecss.com/getting-started.html">MaterializeCSS </a>
-           by <a className="grey-text text-lighten-4" target="_blank" href="https://github.com/pratyushbehera">[Pratyush]</a></small>
+           by <a className="grey-text text-lighten-4" href="https://github.com/pratyushbehera">[Pratyush]</a></small>
         </div>
       
     </footer>

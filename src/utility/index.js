@@ -1,6 +1,11 @@
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
+const ChartColor = ['rgba(0, 28, 255, 0.59)','rgba(142, 28, 255, 0.59)','rgba(142, 211, 40, 0.59)',
+'rgba(255, 81, 40, 0.59)'];
+const ChartBorder = ['rgba(0, 28, 255, 1)','rgba(142, 28, 255, 1)','rgba(142, 211, 40, 1)',
+'rgba(255, 81, 40, 1)'];
+
 export function GetIconUrl(icon) {
     return `../img/${icon}.svg`;
     //return `http://openweathermap.org/img/wn/${icon}@2x.png`;
@@ -50,7 +55,7 @@ const GetDay = (dateObj) => {
 const GRAPH = {
     options: {
         responsive: true,
-
+        fill: true,
         plugins: {
             legend: {
                 labels: {
@@ -78,11 +83,15 @@ const GRAPH = {
 }
 
 const GraphDataset = (weather, name, prop) => {
+    const index = Math.floor(Math.random() * ChartColor.length);
+    const color = ChartColor[index];
+    const border = ChartBorder[index];
+
     return {
         label: name,
         data: weather.data.map(i => i[prop]),
-        backgroundColor: ['rgba(20, 167, 108, 0.2)'],
-        borderColor: ['rgba(20, 167, 108, 1)'],
+        backgroundColor: color,
+        borderColor: border,
         borderWidth: 1
     };
 }

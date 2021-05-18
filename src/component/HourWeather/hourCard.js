@@ -23,7 +23,7 @@ const STYLE = {
 
 const HourCard = (props) => {
     return (
-        <div className="card left" style={STYLE.hourCard}>
+        <div className={"card left " + (props.isLoading ? "loading": "")} style={STYLE.hourCard}>
             <span style={STYLE.hourTimeSize}>
                 {GetHourOnly(props.time)}
             </span>

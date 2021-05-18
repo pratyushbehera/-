@@ -21,7 +21,7 @@ export default class App extends React.Component {
       graphType: 0,
       searchKey: "",
       isSearchLoading: false,
-      searchResult: [],
+      searchResult: null,
     };
 
     this.GetPlaceByIP = this.GetPlaceByIP.bind(this);
@@ -34,23 +34,37 @@ export default class App extends React.Component {
     this.keyPressHandler = this.keyPressHandler.bind(this);
     this.enableNotification = this.enableNotification.bind(this);
     this.showNotificationPermission = this.showNotificationPermission.bind(this);
+
+    this.updateCurrentPlace = this.updateCurrentPlace.bind(this);
+    this.seekPermission = this.seekPermission.bind(this);
   }
-  
+
   componentDidMount() {
-    this.GetPlaceByIP();
-    let instances;
     document.addEventListener('DOMContentLoaded', function () {
-      instances = M.Modal.init(document.querySelectorAll('.modal'), {});
+    M.Modal.init(document.querySelectorAll('.modal'), {});     
+    });
+
+    
+    navigator.permissions.query({ name: 'geolocation' })
+    .then(({ state }) => {
+      if (state === "prompt")
+        {
+          
+    var toastHTML = `<span>App will access your location. You can change the settings later</span>`;
+    M.toast({ html: toastHTML });
+        }
+        
+    this.getWeatherByLocation();
     });
   }
-  
-  componentWillUnmount(){
+
+  componentWillUnmount() {
     let instances;
     document.removeEventListener('DOMContentLoaded', function () {
       instances = M.Modal.init(document.querySelectorAll('.modal'), {});
     });
-    if(instances)
-    instances.destroy();
+    if (instances)
+      instances.destroy();
   }
 
   async GetPlaceByIP() {
@@ -86,18 +100,19 @@ export default class App extends React.Component {
 
   async GetPlaceList(event) {
     let dal = new DataAccess();
+    let toastHTML;
     this.setState({
       isSearchLoading: true
     });
     let data = await dal.GetPlaceList(this.state.searchKey);
     if (data instanceof Error) {
-      var toastHTML = '<span>Some error occurred</span>';
+      toastHTML = '<span>No place found</span>';
       M.toast({ html: toastHTML });
     }
     else {
       this.setState({
         isSearchLoading: false,
-        searchResult: data
+        searchResult: !data.Error ? data : []
       });
     }
   }
@@ -139,13 +154,67 @@ export default class App extends React.Component {
     document.querySelectorAll('body')[0].attributes[0].nodeValue = "overflow: visible;"
   }
 
-  enableNotification(){    
+  enableNotification() {
     let notification = new Notify();
     notification.createNotification();
   }
 
-  showNotificationPermission(){
+  showNotificationPermission() {
     //To be implemented
+  }
+
+  seekPermission(error){
+    let errorMsg = "";
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        errorMsg = "Location access denied. Accessing location from IP";
+        break;
+      case error.POSITION_UNAVAILABLE:
+        errorMsg = "Location information is unavailable.";
+        break;
+      case error.TIMEOUT:
+        errorMsg = "The request to get your location timed out.";
+        break;
+      case error.UNKNOWN_ERROR:
+        errorMsg = "An unknown error occurred.";
+        break;
+      default:
+        break;
+    }
+    var toastHTML = `<span>${errorMsg}</span>`;
+    M.toast({ html: toastHTML });
+    
+    this.GetPlaceByIP();
+  }
+
+  getWeatherByLocation(){
+    navigator.permissions.query({ name: 'geolocation' })
+    .then(({ state }) => {
+      if (state === "granted" || state === "prompt")
+      {
+        navigator.geolocation.getCurrentPosition(this.updateCurrentPlace,this.seekPermission);
+      }
+      else{
+        this.GetPlaceByIP();
+      }
+    });
+  }
+
+  async updateCurrentPlace(position){
+    let coordinates = { 'Latitude': position.coords.longitude, 'Longitude': position.coords.latitude };
+    let dal = new DataAccess();
+    let res = await dal.GetPlaceByCoordinates(coordinates);
+    if (res instanceof Error) {
+      var toastHTML = res.toString();
+      M.toast({ html: toastHTML });
+    }
+    else {
+      if(res.place)
+      this.GetWeatherByPlace(`${res.place}`);
+      this.setState({
+        currentPlace: `${res.place}`
+      });
+    }
   }
 
   render() {
@@ -153,7 +222,7 @@ export default class App extends React.Component {
     return (
       <>
         <Helmet>
-          <title>{renderTitle} | Weather App</title>
+          <title>{renderTitle ? (renderTitle + " | Weather App") : "Weather App"}</title>
         </Helmet>
         <Header isLoading={this.state.isLoading} currentPlace={this.state.currentPlace} />
         <Body isLoading={this.state.isLoading} isExpanded={this.state.isExpanded}
@@ -163,7 +232,6 @@ export default class App extends React.Component {
           toggleExpansion={this.toggleExpansion} />
         <Search GetPlaceList={this.GetPlaceList} onChangeHandler={this.onChangeHandler} keyPressHandler={this.keyPressHandler}
           data={this.state.searchResult} setCurrentPlace={this.setCurrentPlace} isLoading={this.state.isSearchLoading} />
-
         <Footer />
       </>
     );

@@ -5,6 +5,7 @@ import Header from '../Header';
 import Body from '../Body';
 import Footer from '../Footer';
 import Search from '../Search';
+import Error from '../Error';
 import { GetWeeklyGraph } from '../../utility';
 import Notify from '../../utility/notification';
 import DataAccess from '../../data';
@@ -41,21 +42,20 @@ export default class App extends React.Component {
 
   componentDidMount() {
     document.addEventListener('DOMContentLoaded', function () {
-    M.Modal.init(document.querySelectorAll('.modal'), {});     
+      M.Modal.init(document.querySelectorAll('.modal'), {});
     });
 
-    
+
     navigator.permissions.query({ name: 'geolocation' })
-    .then(({ state }) => {
-      if (state === "prompt")
-        {
-          
-    var toastHTML = `<span>App will access your location. You can change the settings later</span>`;
-    M.toast({ html: toastHTML });
+      .then(({ state }) => {
+        if (state === "prompt") {
+
+          var toastHTML = `<span>App will access your location. You can change the settings later</span>`;
+          M.toast({ html: toastHTML });
         }
-        
-    this.getWeatherByLocation();
-    });
+
+        this.getWeatherByLocation();
+      });
   }
 
   componentWillUnmount() {
@@ -88,14 +88,20 @@ export default class App extends React.Component {
     if (data instanceof Error) {
       var toastHTML = '<span>Some error occurred</span>';
       M.toast({ html: toastHTML });
+      this.setState({isError:true});
     }
     else {
       this.setState({
+        isError:false,
         isLoading: false,
         weather: data
       });
       GetWeeklyGraph(this.state.weather.daily, this.state.graphType);
     }
+  }
+
+  componentDidCatch(){
+    this.setState({isError:true});
   }
 
   async GetPlaceList(event) {
@@ -163,7 +169,7 @@ export default class App extends React.Component {
     //To be implemented
   }
 
-  seekPermission(error){
+  seekPermission(error) {
     let errorMsg = "";
     switch (error.code) {
       case error.PERMISSION_DENIED:
@@ -183,24 +189,23 @@ export default class App extends React.Component {
     }
     var toastHTML = `<span>${errorMsg}</span>`;
     M.toast({ html: toastHTML });
-    
+
     this.GetPlaceByIP();
   }
 
-  getWeatherByLocation(){
+  getWeatherByLocation() {
     navigator.permissions.query({ name: 'geolocation' })
-    .then(({ state }) => {
-      if (state === "granted" || state === "prompt")
-      {
-        navigator.geolocation.getCurrentPosition(this.updateCurrentPlace,this.seekPermission);
-      }
-      else{
-        this.GetPlaceByIP();
-      }
-    });
+      .then(({ state }) => {
+        if (state === "granted" || state === "prompt") {
+          navigator.geolocation.getCurrentPosition(this.updateCurrentPlace, this.seekPermission);
+        }
+        else {
+          this.GetPlaceByIP();
+        }
+      });
   }
 
-  async updateCurrentPlace(position){
+  async updateCurrentPlace(position) {
     let coordinates = { 'Latitude': position.coords.longitude, 'Longitude': position.coords.latitude };
     let dal = new DataAccess();
     let res = await dal.GetPlaceByCoordinates(coordinates);
@@ -209,8 +214,8 @@ export default class App extends React.Component {
       M.toast({ html: toastHTML });
     }
     else {
-      if(res.place)
-      this.GetWeatherByPlace(`${res.place}`);
+      if (res.place)
+        this.GetWeatherByPlace(`${res.place}`);
       this.setState({
         currentPlace: `${res.place}`
       });
@@ -224,14 +229,19 @@ export default class App extends React.Component {
         <Helmet>
           <title>{renderTitle ? (renderTitle + " | Weather App") : "Weather App"}</title>
         </Helmet>
-        <Header isLoading={this.state.isLoading} currentPlace={this.state.currentPlace} />
-        <Body isLoading={this.state.isLoading} isExpanded={this.state.isExpanded}
+        <Header isLoading={this.state.isLoading} />
+        { !this.state.isError ?
+        (<>
+        <Body isLoading={this.state.isLoading} isExpanded={this.state.isExpanded} currentPlace={this.state.currentPlace}
           timeZone={this.state.weather.timezone} currently={this.state.weather.currently}
           hourly={this.state.weather.hourly} weekly={this.state.weather.daily}
           graphType={this.state.graphType} SetGraphType={this.SetGraphType}
           toggleExpansion={this.toggleExpansion} />
         <Search GetPlaceList={this.GetPlaceList} onChangeHandler={this.onChangeHandler} keyPressHandler={this.keyPressHandler}
           data={this.state.searchResult} setCurrentPlace={this.setCurrentPlace} isLoading={this.state.isSearchLoading} />
+          </>
+        ) : <Error/>}
+
         <Footer />
       </>
     );

@@ -55,7 +55,6 @@ const GetDay = (dateObj) => {
 const GRAPH = {
     options: {
         responsive: true,
-        fill: true,
         plugins: {
             legend: {
                 labels: {
@@ -82,18 +81,22 @@ const GRAPH = {
     }
 }
 
-const GraphDataset = (weather, name, prop) => {
+const GraphDataset = (weather, propArr) => {
     const index = Math.floor(Math.random() * ChartColor.length);
-    const color = ChartColor[index];
-    const border = ChartBorder[index];
+    const color = [ChartColor[index], ChartColor[(index +1) % ChartColor.length]];
+    const border = [ChartBorder[index],ChartBorder[(index +1) % ChartBorder.length]];
 
-    return {
-        label: name,
-        data: weather.data.map(i => i[prop]),
-        backgroundColor: color,
-        borderColor: border,
-        borderWidth: 1
-    };
+    let graphData = propArr.map((item,index)=>{
+        return {
+            label: item.title,
+            data: weather.data.map(i => i[item.property]),
+            backgroundColor: color[index],
+            borderColor: border[index],
+            borderWidth: 1
+        };
+    })
+
+    return graphData;
 }
 let weeklyChart;
 export function GetWeeklyGraph(weekly, type) {
@@ -117,26 +120,23 @@ const CreateDataset = (weekly, type) => {
     let dataset;
     switch (type) {
         case 0:
-            dataset = [GraphDataset(weekly, 'Temp High', 'temperatureHigh'),
-            GraphDataset(weekly, 'Temp Low', 'temperatureLow')];
+            dataset = GraphDataset(weekly, [{'title':'Temp High', 'property':'temperatureHigh'},{'title':'Temp Low', 'property':'temperatureLow'}]);
             break;
         case 1:
-            dataset = [GraphDataset(weekly, 'Precipitation Probability', 'precipProbability'),
-            GraphDataset(weekly, 'Precipitation Intensity', 'precipIntensity')];
+            dataset = GraphDataset(weekly, [{'title':'Precipitation Probability', 'property':'precipProbability'}]);
             break;
         case 2:
-            dataset = [GraphDataset(weekly, 'Wind Speed', 'windSpeed')];
+            dataset = GraphDataset(weekly, [{'title':'Wind Speed', 'property':'windSpeed'}]);
             break;
         case 3:
-            dataset = [GraphDataset(weekly, 'Humidity', 'humidity')];
+            dataset = GraphDataset(weekly, [{'title':'Humidity', 'property':'humidity'}]);
             break;
         case 4:
-            dataset = [GraphDataset(weekly, 'Cloud Cover', 'cloudCover')];
+            dataset = GraphDataset(weekly, [{'title':'Cloud Cover', 'property':'cloudCover'}]);
             break;
 
         default:
-            dataset = [GraphDataset(weekly, 'Temp High', 'temperatureHigh'),
-            GraphDataset(weekly, 'Temp Low', 'temperatureLow')];
+            dataset = GraphDataset(weekly, ['Temp High', 'temperatureHigh','Temp Low', 'temperatureLow']);
             break;
     }
     return dataset;
